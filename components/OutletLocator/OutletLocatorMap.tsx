@@ -1,232 +1,3 @@
-// "use client";
-// import React, { useState, useEffect } from "react";
-// import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
-// import L from "leaflet";
-// import { useQuery } from "react-query";
-// import ApiService from "@/lib/ApiService";
-// import { LocationType } from "@/types/indes";
-// import {
-//   AlignJustify,
-//   ChevronLeft,
-//   Clock,
-//   Coffee,
-//   Fuel,
-//   MoveRight,
-//   Search,
-// } from "lucide-react";
-// import MapPopup from "../MapPopup";
-// import LefleatMapIcon from "@/lib/LefleatIcon";
-// import { Input } from "../ui/input";
-// import { Button } from "../ui/button";
-// import { cn } from "@/lib/utils";
-// import Fuse from "fuse.js";
-// import MarkerClusterGroup from "react-leaflet-markercluster";
-// import "react-leaflet-markercluster/styles";
-
-// const OutletLocatorMap = () => {
-//   const [map, setMap] = useState<L.Map | null>(null);
-//   const [selectedLocationDetails, setSelectedLocationDetails] =
-//     useState<LocationType | null>(null);
-//   const [searchQuery, setSearchQuery] = useState<string>("");
-//   const [filteredData, setFilteredData] = useState<LocationType[]>([]);
-//   const [openList, setOpenList] = useState<boolean>(false);
-//   const [allLocations, setAllLocations] = useState<LocationType[]>([]);
-
-//   // 🔥 Ambil Data Sekali Saat Komponen Mount
-//   const { data: locationData, isLoading } = useQuery({
-//     queryKey: ["outlet-locator"],
-//     queryFn: async () => await getLocation(),
-//     onSuccess: (data) => {
-//       setAllLocations(data);
-//       setFilteredData(data);
-//     },
-//   });
-
-//   // 🔹 Ambil Semua Data Dari API Sekali
-//   const getLocation = async () => {
-//     try {
-//       const [res1, listingsData] = await Promise.all([
-//         ApiService.get("/location", { page: 1, limit: 99999 }),
-//         fetchAllListings(),
-//       ]);
-
-//       const locationData = res1.data.data || [];
-
-//       // 🔄 **Hilangkan duplikasi berdasarkan kode unik**
-//       const uniqueLocations = new Map<string, LocationType>();
-
-//       locationData.forEach((loc: LocationType) => {
-//         uniqueLocations.set(loc.code, loc);
-//       });
-
-//       listingsData.forEach((listing: LocationType) => {
-//         if (!uniqueLocations.has(listing.listing_code)) {
-//           uniqueLocations.set(listing.listing_code, listing);
-//         }
-//       });
-
-//       const combinedResults = Array.from(uniqueLocations.values());
-
-//       // console.log("✅ Hasil Akhir Data yang Sudah Digabung:", combinedResults.length, combinedResults);
-
-//       return Array.from(uniqueLocations.values());
-//     } catch (error) {
-//       console.error("Error fetching locations:", error);
-//       return [];
-//     }
-//   };
-
-//   // 🔍 Ambil Semua Listings
-//   const fetchAllListings = async () => {
-//     let page = 1;
-//     let allData: LocationType[] = [];
-
-//     while (true) {
-//       const res = await ApiService.get(
-//         "/listings",
-//         { page, limit: 10 },
-//         {},
-//         true
-//       );
-//       const listings = res.data.data || [];
-//       if (listings.length === 0) break;
-//       allData = [...allData, ...listings];
-//       page++;
-//     }
-//     return allData;
-//   };
-
-//   // 🔎 **Optimasi Pencarian dengan Fuse.js**
-//   useEffect(() => {
-//     if (!searchQuery) {
-//       setFilteredData(allLocations); // Reset ke semua data jika kosong
-//       return;
-//     }
-
-//     const fuse = new Fuse(allLocations, {
-//       keys: ["name", "address"], // Cari berdasarkan nama & alamat
-//       threshold: 0.3, // Semakin kecil, semakin akurat
-//     });
-
-//     const results = fuse.search(searchQuery).map((res) => res.item);
-//     setFilteredData(results);
-//   }, [searchQuery, allLocations]);
-
-//   return (
-//     <section className="w-full h-screen xl:max-h-[800px] relative border rounded-2xl overflow-hidden">
-//       {!openList && (
-//         <Button
-//           onClick={() => setOpenList(true)}
-//           className="absolute top-8 right-8 z-40 lg:hidden"
-//         >
-//           <AlignJustify />
-//         </Button>
-//       )}
-
-//       <section
-//         className={cn(
-//           {
-//             "-translate-x-[100%] lg:translate-x-0": !openList,
-//             "translate-x-0 lg:translate-x-0": openList,
-//           },
-//           "absolute h-auto top-0 z-30 bg-white w-full lg:max-w-[450px] p-8 transition-all"
-//         )}
-//       >
-//         {/* Search Bar */}
-//         <div className="flex justify-end mb-8 lg:hidden">
-//           <Button onClick={() => setOpenList((prev) => !prev)}>Close</Button>
-//         </div>
-//         <div className="flex gap-2">
-//           <Input
-//             placeholder="Search location"
-//             onChange={(e) => setSearchQuery(e.target.value)}
-//             value={searchQuery}
-//           />
-//           <Button>
-//             <Search />
-//           </Button>
-//         </div>
-
-//         {/* List */}
-//         {filteredData.length > 0 ? (
-//           <div className="mt-8 max-h-[calc(100vh-114px)] overflow-auto grid gap-4">
-//             {filteredData.slice(0, 20).map((item) => (
-//               <section
-//                 key={item._id}
-//                 className="flex space-x-2 items-start border-b pb-4 border-black/20"
-//               >
-//                 <img
-//                   className="w-[18px]"
-//                   src="/icons/green-pinpoint.svg"
-//                   alt="pinpoint"
-//                 />
-//                 <div>
-//                   <button
-//                     onClick={() => {
-//                       map?.flyTo([+item.lat, +item.long], 15);
-//                       setSelectedLocationDetails(item);
-//                     }}
-//                   >
-//                     <h1 className="font-semibold hover:underline text-left">
-//                       {item.name}
-//                     </h1>
-//                   </button>
-//                   <span className="inline-block mt-2">{item.address}</span>
-//                 </div>
-//               </section>
-//             ))}
-//           </div>
-//         ) : (
-//           <p className="mt-8 text-center text-gray-500">No results found.</p>
-//         )}
-//       </section>
-//       <MapContainer
-//         ref={(map) => {
-//           if (map) {
-//             setMap(map);
-//           }
-//         }}
-//         center={[-4.775231, 109.042028]}
-//         className="w-full h-full  z-20"
-//         zoom={6}
-//       >
-//         <TileLayer url="https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=c56d26e0f3eb454f8dff29acecde52d6" />
-//         <MarkerClusterGroup>
-//           {locationData
-//             ?.filter((d) => {
-//               if (selectedLocationDetails) {
-//                 return d._id === selectedLocationDetails._id;
-//               }
-
-//               return d;
-//             })
-//             ?.map((item) => (
-//               <Marker
-//                 eventHandlers={{
-//                   click: () => {
-//                     map?.flyTo([+item.lat, +item.long], 15);
-//                     setTimeout(() => {
-//                       setSelectedLocationDetails(item);
-//                     }, 500);
-//                   },
-//                 }}
-//                 key={item._id}
-//                 position={[+item.lat || 0, +item.long || 0]}
-//                 icon={LefleatMapIcon.SPBU}
-//               >
-//                 <Popup className="m-0">
-//                   <MapPopup item={item} />
-//                 </Popup>
-//               </Marker>
-//             ))}
-//         </MarkerClusterGroup>
-//       </MapContainer>
-//     </section>
-//   );
-// };
-
-// export default OutletLocatorMap;
-
 "use client";
 import React, {useState} from "react";
 import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet";
@@ -234,16 +5,16 @@ import L from "leaflet";
 import {useQuery} from "react-query";
 import ApiService from "@/lib/ApiService";
 import {LocationType} from "@/types/indes";
-import {AlignJustify, ChevronLeft, Clock, Coffee, Fuel, MoveRight, Search} from "lucide-react";
+import {AlignJustify, ChevronLeft, Clock, Coffee, Fuel, MoveRight, Search, Compass} from "lucide-react";
 import MapPopup from "../MapPopup";
 import LefleatMapIcon from "@/lib/LefleatIcon";
 import {Input} from "../ui/input";
 import {Button} from "../ui/button";
 import {cn} from "@/lib/utils";
 import {useDebounce} from "use-debounce";
-// import moment from "moment";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import "react-leaflet-markercluster/styles";
+import axios from "axios";
 
 const OutletLocatorMap = () => {
   const [map, setMap] = useState<L.Map | null>(null);
@@ -251,6 +22,8 @@ const OutletLocatorMap = () => {
   const [value, setValue] = useState<string>("");
   const [locationQuery] = useDebounce(value, 1000);
   const [openList, setOpenList] = useState<boolean>(false);
+  const [surroundingArea, setSurroundingArea] = useState<string[]>(); 
+  const [facilities, setFacilities] = useState<string[]>([]);
 
   const {data: locationData, refetch} = useQuery({
     queryKey: ["outlet-locator"],
@@ -279,6 +52,43 @@ const OutletLocatorMap = () => {
       return res.data.data as LocationType[] | [];
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const fetchSurroundingArea = async (code: string) => {
+    try {
+      console.log("Fetching API with code:", code);
+      const res = await axios.get(`https://pertare.asets.id/api/listings/${code}`);
+  
+      if (!res.data.success || !res.data.data) {
+        throw new Error(res.data.message || "Failed to fetch surrounding area data");
+      }
+  
+      // Get data surrounding area
+      const surroundingAreas: { surrounding_area_name: string }[] = res.data.data.surrounding_areas || [];
+      setSurroundingArea(surroundingAreas.length ? surroundingAreas.map(a => a.surrounding_area_name) : ["-"]);
+  
+      // Get data facilities
+      const facilitiesData: { facility_name: string }[] = res.data.data.facilities || [];
+      const newFacilities = facilitiesData.length ? facilitiesData.map(f => f.facility_name) : ["-"];
+
+      setFacilities(newFacilities);
+  
+      console.log("Facilities:", facilitiesData);
+    } catch (error) {
+      console.error("Error fetching surrounding area:", error);
+      setSurroundingArea(["-"]);
+      setFacilities(["-"]);
+    }
+  };
+
+  
+  const handleSelectLocation = (item: LocationType) => {
+    setSelectedLocationDetails(item);
+    setSurroundingArea([]); 
+    setFacilities([]);
+    if (item.code) {
+      fetchSurroundingArea(item.code);
     }
   };
 
@@ -344,14 +154,42 @@ const OutletLocatorMap = () => {
               </div>
             ) : null}
 
-            {selectedLocationDetails?.facility?.length ? (
+            {(selectedLocationDetails?.facility?.length || (facilities && facilities.length)) ? (
               <div className="mt-4">
                 <p className="font-medium uppercase flex items-center gap-2 leading-none border-b pb-2">
                   <Coffee /> Facility :{" "}
                 </p>
                 <ul className="grid grid-cols-2 mt-2 gap-1">
-                  {selectedLocationDetails.facility.split(",").map((f) => (
-                    <li key={f}>{f}</li>
+                  {selectedLocationDetails?.facility
+                    ?.split(",")
+                    .map((f) => (
+                      <li key={f.trim()}>{f.trim()}</li> 
+                    ))}
+
+                  {/* Filtered Data */}
+                  {facilities
+                    ?.filter(
+                      (f) =>
+                        !selectedLocationDetails?.facility
+                          ?.split(",")
+                          .map((item) => item.trim().toLowerCase()) 
+                          .includes(f.trim().toLowerCase())
+                    )
+                    .map((f, index) => (
+                      <li key={`api-${index}`}>{f.trim()}</li>
+                    ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {surroundingArea && surroundingArea.length ? (
+              <div className="mt-4">
+                <p className="font-medium uppercase flex items-center gap-2 leading-none border-b pb-2">
+                  <Compass /> Surrounding Area:{" "}
+                </p>
+                <ul className="grid grid-cols-2 mt-2 gap-1">
+                  {surroundingArea.map((area, index) => (
+                    <li key={index}>{area}</li>
                   ))}
                 </ul>
               </div>
@@ -387,7 +225,7 @@ const OutletLocatorMap = () => {
                   <button
                     onClick={() => {
                       map?.flyTo([+item.lat, +item.long], 15);
-                      setSelectedLocationDetails(item);
+                      handleSelectLocation(item);
                     }}
                   >
                     <h1 className="font-semibold hover:underline text-left">{item.name}</h1>
