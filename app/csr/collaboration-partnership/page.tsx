@@ -7,7 +7,7 @@ import { ContentType } from "@/types/indes";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import React from "react";
-
+export const dynamic = 'force-dynamic'
 export async function generateMetadata(): Promise<Metadata> {
   const result: ContentType = await getData(CONTENT_TYPE.CSR_LIST);
 
@@ -59,7 +59,7 @@ const CollaborationPartnership = async () => {
     },
     {
       href: "/csr/our-programs",
-      image: "temp/program-kami.png",
+      image: "/temp/program-kami.png",
       alt: "Program Kami",
       title: "Program Kami",
     },

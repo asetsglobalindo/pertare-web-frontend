@@ -6,6 +6,10 @@ import { HomeType } from "@/types/indes";
 import { Metadata } from "next";
 import moment from "moment";
 
+// In your page.js files
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // Import Swiper styles
 import "swiper/css";
 import Link from "next/link";
@@ -49,9 +53,11 @@ export default async function Home() {
   return (
     <section>
       <HomeBanner data={content} />
+
       {/* our bussiness */}
       <HomeBussiness data={content} />
 
+      {/* home locator */}
       <HomeLocatorClient data={content} />
 
       {/* growth revenue */}

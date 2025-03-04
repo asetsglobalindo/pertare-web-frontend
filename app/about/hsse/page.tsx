@@ -1,11 +1,17 @@
 import BannerSingleMulti from "@/components/BannerSingleMulti";
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import ApiService from "@/lib/ApiService";
 import CONTENT_TYPE from "@/lib/content-type";
-import {ContentType} from "@/types/indes";
-import {Metadata} from "next";
-import {notFound} from "next/navigation";
+import { ContentType } from "@/types/indes";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import React from "react";
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const result: ContentType = await getData();
@@ -60,7 +66,7 @@ const page = async () => {
         <h1 className="title-3 text-center">{data.title}</h1>
         <Accordion
           type="multiple"
-          defaultValue={["item-0", "item-1", "item-2"]}
+          defaultValue={data.body.map((_, index) => `item-${index}`)}
           className="w-full flex flex-col gap-8 mt-16"
         >
           {data.body.map((data, index) => (
@@ -72,11 +78,16 @@ const page = async () => {
               <AccordionTrigger className="outline-none">
                 <div className="flex items-center gap-4">
                   <img src={data?.images[0]?.images[0]?.url} alt={data.title} />
-                  <span className="inline-block font-bold md:text-lg">{data.title}</span>
+                  <span className="inline-block font-bold md:text-lg">
+                    {data.title}
+                  </span>
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                <div className="border-t pt-4" dangerouslySetInnerHTML={{__html: data.text}}></div>
+                <div
+                  className="border-t pt-4"
+                  dangerouslySetInnerHTML={{ __html: data.text }}
+                ></div>
               </AccordionContent>
             </AccordionItem>
           ))}
@@ -87,4 +98,3 @@ const page = async () => {
 };
 
 export default page;
-

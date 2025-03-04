@@ -9,7 +9,7 @@ import "swiper/css/effect-fade";
 const SLIDE_DURATION = 5000;
 
 const Timeline = ({
-  data,
+  data = [],
 }: {
   data: { year: string; image: string; description: string }[];
 }) => {
@@ -22,6 +22,7 @@ const Timeline = ({
     setActiveIndex(swiper.realIndex);
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (progressRef.current) {
       const totalYears = data.length;
@@ -41,7 +42,7 @@ const Timeline = ({
         className="swiper-container"
         ref={swiperRef}
       >
-        {data.map((item, index) => (
+        {data?.map((item, index) => (
           <SwiperSlide key={index}>
             <div className="relative w-full h-screen">
               <img
@@ -60,7 +61,7 @@ const Timeline = ({
               </div>
             </div>
           </SwiperSlide>
-        ))}
+        )) || []}
       </Swiper>
 
       {/* Timeline Navigation */}

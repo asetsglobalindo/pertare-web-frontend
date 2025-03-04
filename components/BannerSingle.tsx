@@ -15,6 +15,7 @@ const BannerSingle: React.FC<{ data: ImageType[]; lang: string }> = ({
   const pathname = usePathname();
   const { t } = useTranslation();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     ui.setHeaderColor(inView ? "white" : "black");
   }, [inView]);
@@ -25,62 +26,62 @@ const BannerSingle: React.FC<{ data: ImageType[]; lang: string }> = ({
 
   // Mapping title berdasarkan bahasa
   const titleMapping: Record<string, Record<string, string>> = {
-    about: { 
-      id: "Profil", 
-      en: "Profile" 
+    about: {
+      id: "Profil",
+      en: "Profile",
     },
-    csr: { 
-      id: "Tanggung Jawab Sosial", 
-      en: "Corporate Social Responsibility" 
+    csr: {
+      id: "Tanggung Jawab Sosial",
+      en: "Corporate Social Responsibility",
     },
-    "our-values": { 
-      id: "Tata Nilai", 
-      en: "Our Values"
+    "our-values": {
+      id: "Tata Nilai",
+      en: "Our Values",
     },
-    awards: { 
-      id: "Penghargaan", 
-      en: "Awards" 
+    awards: {
+      id: "Penghargaan",
+      en: "Awards",
     },
-    managements: { 
-      id: "Manajemen", 
-      en: "Management" 
+    managements: {
+      id: "Manajemen",
+      en: "Management",
     },
-    "our-programs": { 
-      id: "Program Kami", 
-      en: "Our Programs" 
+    "our-programs": {
+      id: "Program Kami",
+      en: "Our Programs",
     },
-    partnership: { 
-      id: "Kerjasama", 
-      en: "Partnership" 
+    partnership: {
+      id: "Kerjasama",
+      en: "Partnership",
     },
-    news: { 
-      id: "Berita", 
-      en: "News" 
+    news: {
+      id: "Berita",
+      en: "News",
     },
-    career: { 
-      id: "Karir", 
-      en: "Career" 
+    career: {
+      id: "Karir",
+      en: "Career",
     },
-    "bahan-bakar": { 
-      id: "Bahan Bakar", 
-      en: "Fuel" 
+    "bahan-bakar": {
+      id: "Bahan Bakar",
+      en: "Fuel",
     },
-    "non-bahan-bakar": { 
-      id: "Non Bahan Bakar", 
-      en: "Non Fuel" 
+    "non-bahan-bakar": {
+      id: "Non Bahan Bakar",
+      en: "Non Fuel",
     },
-    "company-report": { 
-      id: "Laporan Perusahaan", 
-      en: "Company Report" 
+    "company-report": {
+      id: "Laporan Perusahaan",
+      en: "Company Report",
     },
     "procurement-informations": {
       id: "Informasi Pengadaan",
       en: "Procurement Informations",
     },
-    "collaboration-partnership":{
+    "collaboration-partnership": {
       id: "Kolaborasi & Kemitraan",
-      en: "Collaboration & Partnership"
-    }
+      en: "Collaboration & Partnership",
+    },
   };
 
   const rawTitle = pathname?.split("/").filter(Boolean).pop() || "Home";

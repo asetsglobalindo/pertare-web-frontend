@@ -2,12 +2,12 @@ import AboutManagement from "@/components/About/AboutManagement";
 import BannerSingleMulti from "@/components/BannerSingleMulti";
 import ApiService from "@/lib/ApiService";
 import CONTENT_TYPE from "@/lib/content-type";
-import {ContentType} from "@/types/indes";
-import {Metadata} from "next";
-import {notFound} from "next/navigation";
+import { ContentType } from "@/types/indes";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import React from "react";
 import RelatedPage from "@/components/RelatedPage";
-
+export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const result: ContentType = await getData();
 
@@ -59,13 +59,13 @@ const page = async () => {
     },
     {
       href: "/about/our-values",
-      image: "/temp/values.png",
+      image: "/temp/our-values.png",
       alt: "Tata Nilai",
       title: "Tata Nilai",
     },
     {
       href: "/about/awards",
-      image: '/temp/awards.png',
+      image: "/temp/award.png",
       alt: "Penghargaan",
       title: "Penghargaan",
     },
@@ -79,7 +79,10 @@ const page = async () => {
 
       <section className="container mt-16 max-w-[900px]">
         <h1 className="title-3 text-center text-green-light">{data.title}</h1>
-        <div className="mt-8" dangerouslySetInnerHTML={{__html: data.description}}></div>
+        <div
+          className="mt-8"
+          dangerouslySetInnerHTML={{ __html: data.description }}
+        ></div>
       </section>
       <section className="mt-8 lg:mt-16 container">
         <AboutManagement data={data} />
@@ -91,4 +94,3 @@ const page = async () => {
 };
 
 export default page;
-

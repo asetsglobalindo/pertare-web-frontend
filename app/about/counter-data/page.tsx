@@ -7,48 +7,56 @@ import { useInView } from "react-intersection-observer";
 const CounterData = () => {
   const { ref, inView } = useInView({ triggerOnce: true });
   const [counters, setCounters] = useState([
-    { number: 0, text: "Jumlah SPBU Pertamina Retail" },
+    { number: 0, text: "Jumlah SPBU Pertamina Retail di seluruh Indonesia" },
     { number: 0, text: "Jumlah Bisnis Onboarding di seluruh Indonesia" },
-    { number: 65661, text: "Jumlah UMKM binaan Pertamina Patra Niaga melalui Program Kemitraan" },
+    {
+      number: 0,
+      text: "Total jumlah Jam Kerja Selamat (JKS) Pertamina Retail",
+    },
   ]);
 
   const fetchCounters = useCallback(async () => {
     try {
       console.log("Memuat data...");
       const spbuResponse = await fetch(
-        "https://api-pertamina.192-168-100-100.xyz/location?page=1&limit=99999999"
+        "http://pertare.tradisco.co.id:7052/location"
       );
-  
+
       if (!spbuResponse.ok) {
         throw new Error(`Gagal mengambil data SPBU: ${spbuResponse.status}`);
       }
-  
+
       const spbuData = await spbuResponse.json();
       console.log("Data SPBU:", spbuData);
       const spbuCount = spbuData.pages?.total_data || 0;
-      const bisnisResponse = await fetch("https://service.asets.id/api/recap/total");
-  
+      const bisnisResponse = await fetch(
+        "https://service.asets.id/api/recap/total"
+      );
+
       if (!bisnisResponse.ok) {
-        throw new Error(`Gagal mengambil data bisnis: ${bisnisResponse.status}`);
+        throw new Error(
+          `Gagal mengambil data bisnis: ${bisnisResponse.status}`
+        );
       }
-  
+
       const bisnisData = await bisnisResponse.json();
       console.log("Data Bisnis:", bisnisData);
       const bisnisCount = bisnisData.data?.total_tenant || 0;
-  
+
       // Update state
-      setCounters((prevCounters) => prevCounters.map((counter, index) => {
-        if (index === 0) return { ...counter, number: spbuCount };
-        if (index === 1) return { ...counter, number: bisnisCount };
-        if (index === 2) return { ...counter, number: 1284152 };
-        return counter;
-      }));
-  
+      setCounters((prevCounters) =>
+        prevCounters.map((counter, index) => {
+          if (index === 0) return { ...counter, number: spbuCount };
+          if (index === 1) return { ...counter, number: bisnisCount };
+          if (index === 2) return { ...counter, number: 1284152 };
+          return counter;
+        })
+      );
     } catch (error) {
       console.error("Error fetching counter data:", error);
     }
   }, []);
-  
+
   useEffect(() => {
     fetchCounters();
   }, [fetchCounters]);

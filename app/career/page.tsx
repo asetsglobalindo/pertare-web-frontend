@@ -1,14 +1,20 @@
 import BannerSingleMulti from "@/components/BannerSingleMulti";
-import {Button} from "@/components/ui/button";
-import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious} from "@/components/ui/carousel";
+import { Button } from "@/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import ApiService from "@/lib/ApiService";
-import {ContentType} from "@/types/indes";
-import {ArrowRight} from "lucide-react";
-import {Metadata} from "next";
+import { ContentType } from "@/types/indes";
+import { ArrowRight } from "lucide-react";
+import { Metadata } from "next";
 import Link from "next/link";
-import {notFound} from "next/navigation";
+import { notFound } from "next/navigation";
 import React from "react";
-
+export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const result: ContentType = await getData();
 
@@ -60,12 +66,16 @@ const page = async () => {
 
       <section className=" bg-[#F2F2F2]">
         <section className="container py-8 lg:py-16">
-          <h1 className="title-3 text-green-light my-16 text-center">{data.title}</h1>
+          <h1 className="title-3 text-green-light my-16 text-center">
+            {data.title}
+          </h1>
         </section>
       </section>
 
       <section className="mt-16 container">
-        <h1 className="title-3 text-green-light text-center">{data.small_text}</h1>
+        <h1 className="title-3 text-green-light text-center">
+          {data.small_text}
+        </h1>
         <section className="container py-16 flex flex-col gap-16">
           <Carousel className="">
             <CarouselContent className="">
@@ -87,7 +97,7 @@ const page = async () => {
                       <div className="bg-[#005CAB] lg:flex lg:h-full flex-col justify-center rounded-3xl p-8 text-white -mt-[100px] lg:-mt-0 lg:py-24 lg:pr-16 lg:pl-[calc(100px_+_64px)] lg:ml-[150px]">
                         <div
                           className="xl:text-2xl mt-[100px] lg:mt-0"
-                          dangerouslySetInnerHTML={{__html: d.text}}
+                          dangerouslySetInnerHTML={{ __html: d.text }}
                         ></div>
                         <h1 className="title-4 mt-8">{d.title}</h1>
                         <p>{d.button_name}</p>
@@ -103,10 +113,15 @@ const page = async () => {
       </section>
 
       <section className="mt-16 container">
-        <h1 className="text-center title-3 text-green-light">{data.small_text2}</h1>
+        <h1 className="text-center title-3 text-green-light">
+          {data.small_text2}
+        </h1>
         <section className="flex flex-col-reverse lg:flex-row mt-16 items-center gap-16">
           <div className="lg:w-1/2">
-            <div className="text-xl" dangerouslySetInnerHTML={{__html: data.description}}></div>
+            <div
+              className="text-xl"
+              dangerouslySetInnerHTML={{ __html: data.description }}
+            ></div>
             <Link href={data.bottom_button_route}>
               <Button
                 rounded
@@ -118,7 +133,11 @@ const page = async () => {
               </Button>
             </Link>
           </div>
-          <img className="lg:w-1/2" src={data?.images[0]?.images[0].url} alt={data?.title} />
+          <img
+            className="lg:w-1/2"
+            src={data?.images[0]?.images[0].url}
+            alt={data?.title}
+          />
         </section>
       </section>
     </section>
@@ -126,4 +145,3 @@ const page = async () => {
 };
 
 export default page;
-

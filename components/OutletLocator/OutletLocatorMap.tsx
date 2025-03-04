@@ -5,15 +5,7 @@
 // import { useQuery } from "react-query";
 // import ApiService from "@/lib/ApiService";
 // import { LocationType } from "@/types/indes";
-// import {
-//   AlignJustify,
-//   ChevronLeft,
-//   Clock,
-//   Coffee,
-//   Fuel,
-//   MoveRight,
-//   Search,
-// } from "lucide-react";
+// import { AlignJustify, Search } from "lucide-react";
 // import MapPopup from "../MapPopup";
 // import LefleatMapIcon from "@/lib/LefleatIcon";
 // import { Input } from "../ui/input";
@@ -228,38 +220,60 @@
 // export default OutletLocatorMap;
 
 "use client";
-import React, {useState} from "react";
-import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet";
+import React, { useState } from "react";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
-import {useQuery} from "react-query";
+import { useQuery } from "react-query";
 import ApiService from "@/lib/ApiService";
-import {LocationType} from "@/types/indes";
-import {AlignJustify, ChevronLeft, Clock, Coffee, Fuel, MoveRight, Search} from "lucide-react";
+import { LocationType } from "@/types/indes";
+import {
+  AlignJustify,
+  ChevronLeft,
+  Clock,
+  Coffee,
+  Fuel,
+  MoveRight,
+  Search,
+} from "lucide-react";
 import MapPopup from "../MapPopup";
 import LefleatMapIcon from "@/lib/LefleatIcon";
-import {Input} from "../ui/input";
-import {Button} from "../ui/button";
-import {cn} from "@/lib/utils";
-import {useDebounce} from "use-debounce";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { cn } from "@/lib/utils";
+import { useDebounce } from "use-debounce";
 // import moment from "moment";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import "react-leaflet-markercluster/styles";
 
 const OutletLocatorMap = () => {
   const [map, setMap] = useState<L.Map | null>(null);
-  const [selectedLocationDetails, setSelectedLocationDetails] = useState<LocationType | null>(null);
+  const [selectedLocationDetails, setSelectedLocationDetails] =
+    useState<LocationType | null>(null);
   const [value, setValue] = useState<string>("");
   const [locationQuery] = useDebounce(value, 1000);
   const [openList, setOpenList] = useState<boolean>(false);
 
-  const {data: locationData, refetch} = useQuery({
+  const { data: locationData, refetch } = useQuery({
     queryKey: ["outlet-locator"],
-    queryFn: async () => await getLocation({limit: 99999999, search: locationQuery}),
+    queryFn: async () =>
+      await getLocation({ limit: 99999999, search: locationQuery }),
   });
 
-  const getLocation = async ({limit, search}: {limit: number; search?: string}) => {
+  const getLocation = async ({
+    limit,
+    search,
+  }: {
+    limit: number;
+    search?: string;
+  }) => {
     try {
-      const query: {page: number; limit: number; query?: string; lat: number | null; long: number | null} = {
+      const query: {
+        page: number;
+        limit: number;
+        query?: string;
+        lat: number | null;
+        long: number | null;
+      } = {
         page: 1,
         limit: limit,
         lat: null,
@@ -285,7 +299,10 @@ const OutletLocatorMap = () => {
   return (
     <section className="w-full h-screen xl:max-h-[800px] relative border rounded-2xl overflow-hidden">
       {!openList ? (
-        <Button onClick={() => setOpenList(true)} className="absolute top-8 right-8 z-40 lg:hidden">
+        <Button
+          onClick={() => setOpenList(true)}
+          className="absolute top-8 right-8 z-40 lg:hidden"
+        >
           <AlignJustify />
         </Button>
       ) : null}
@@ -303,7 +320,11 @@ const OutletLocatorMap = () => {
           <Button onClick={() => setOpenList((prev) => !prev)}>Close</Button>
         </div>
         <div className="flex gap-2 ">
-          <Input placeholder="Search location" onChange={(e) => setValue(e.target.value)} value={value} />
+          <Input
+            placeholder="Search location"
+            onChange={(e) => setValue(e.target.value)}
+            value={value}
+          />
           <Button onClick={() => refetch()}>
             <Search />
           </Button>
@@ -316,9 +337,14 @@ const OutletLocatorMap = () => {
               onClick={() => setSelectedLocationDetails(null)}
               className="flex items-center border-b pb-2 mb-4 w-full"
             >
-              <ChevronLeft /> <span className="leading-none underline font-medium">BACK TO RESULT</span>
+              <ChevronLeft />{" "}
+              <span className="leading-none underline font-medium">
+                BACK TO RESULT
+              </span>
             </button>
-            <h1 className="lg:text-lg uppercase font-semibold">{selectedLocationDetails.name}</h1>
+            <h1 className="lg:text-lg uppercase font-semibold">
+              {selectedLocationDetails.name}
+            </h1>
             <p className="mt-2">{selectedLocationDetails.address}</p>
 
             {selectedLocationDetails?.operational_hour?.length ? (
@@ -327,7 +353,9 @@ const OutletLocatorMap = () => {
                   <Clock size={18} />
                   operating hours :{" "}
                 </p>
-                <p className="mt-2">{selectedLocationDetails.operational_hour}</p>
+                <p className="mt-2">
+                  {selectedLocationDetails.operational_hour}
+                </p>
               </div>
             ) : null}
             {selectedLocationDetails?.fuel?.length ? (
@@ -362,7 +390,10 @@ const OutletLocatorMap = () => {
                 className="mt-4 w-full block"
                 target="_blank"
                 href={
-                  "http://www.google.com/maps/place/" + selectedLocationDetails.lat + "," + selectedLocationDetails.long
+                  "http://www.google.com/maps/place/" +
+                  selectedLocationDetails.lat +
+                  "," +
+                  selectedLocationDetails.long
                 }
               >
                 <Button className="w-full flex justify-center items-center">
@@ -381,8 +412,15 @@ const OutletLocatorMap = () => {
             )}
           >
             {locationData?.slice(0, 20)?.map((item) => (
-              <section key={item._id} className="flex space-x-2 items-start border-b pb-4 border-black/20">
-                <img className="w-[18px]" src="/icons/green-pinpoint.svg" alt="pinpoint" />
+              <section
+                key={item._id}
+                className="flex space-x-2 items-start border-b pb-4 border-black/20"
+              >
+                <img
+                  className="w-[18px]"
+                  src="/icons/green-pinpoint.svg"
+                  alt="pinpoint"
+                />
                 <div>
                   <button
                     onClick={() => {
@@ -390,7 +428,9 @@ const OutletLocatorMap = () => {
                       setSelectedLocationDetails(item);
                     }}
                   >
-                    <h1 className="font-semibold hover:underline text-left">{item.name}</h1>
+                    <h1 className="font-semibold hover:underline text-left">
+                      {item.name}
+                    </h1>
                   </button>
                   <span className="inline-block mt-2">{item.address}</span>
                 </div>

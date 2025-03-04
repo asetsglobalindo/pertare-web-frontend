@@ -2,11 +2,11 @@ import BannerSingleMulti from "@/components/BannerSingleMulti";
 import RelatedPage from "@/components/RelatedPage";
 import ApiService from "@/lib/ApiService";
 import CONTENT_TYPE from "@/lib/content-type";
-import {ContentType} from "@/types/indes";
-import {Metadata} from "next";
-import {notFound} from "next/navigation";
+import { ContentType } from "@/types/indes";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import React from "react";
-
+export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const result: ContentType = await getData();
 
@@ -64,7 +64,7 @@ const page = async () => {
     },
     {
       href: "/about/awards",
-      image: '/temp/awards.png',
+      image: "/temp/award.png",
       alt: "Penghargaan",
       title: "Penghargaan",
     },
@@ -76,11 +76,15 @@ const page = async () => {
         <BannerSingleMulti data={data.banner} />
       </section>
 
-      <section className="container mt-16 max-w-[900px]">
+      <section className="container mt-16 max-w-[1200px]">
         <section className="grid grid-cols-1 gap-8 md:gap-16">
           {data?.images?.map((d) => (
             <div key={d._id} className="flex justify-center">
-              <img className="w-full object-contain" src={d?.images[0]?.url} alt={d.title} />
+              <img
+                className="w-full object-contain"
+                src={d?.images[0]?.url}
+                alt={d.title}
+              />
             </div>
           ))}
         </section>
@@ -92,4 +96,3 @@ const page = async () => {
 };
 
 export default page;
-
