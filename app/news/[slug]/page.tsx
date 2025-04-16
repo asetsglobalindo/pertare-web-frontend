@@ -48,7 +48,7 @@ const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const data: ContentType = await getData(slug);
 
   return (
-    <section className="mt-16 container">
+    <section className="mt-24 container">
       <h1 className="title-3 w-full mx-auto text-start">{data.title}</h1>
       <p className="text-start font-medium mt-8">
         <span className="text-green-light">{data.category_id.name}</span> /{" "}

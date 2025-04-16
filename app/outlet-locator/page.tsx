@@ -12,7 +12,7 @@ const page = async () => {
 
   return (
     <React.Fragment>
-      <section className="xl:container mt-16">
+      <section className="xl:container mt-24">
         <h1 className="title-3 text-center max-w-[80%] text-green-light lg:w-full mx-auto">
           {lang === "en"
             ? "Find Your Nearest Pertamina Store"
