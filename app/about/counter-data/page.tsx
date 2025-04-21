@@ -20,9 +20,7 @@ const CounterData = () => {
 
   const fetchCounters = useCallback(async () => {
     try {
-      const spbuResponse = await fetch(
-        "https://api-pertare.tradisco.co.id/location"
-      );
+      const spbuResponse = await fetch(`${process.env.BASE_URL}/location`);
 
       if (!spbuResponse.ok) {
         throw new Error(`Gagal mengambil data SPBU: ${spbuResponse.status}`);
