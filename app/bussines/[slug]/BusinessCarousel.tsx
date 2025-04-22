@@ -72,26 +72,21 @@ const BusinessCarousel = ({
                   </h2>
                 </section>
               </header>
-              <div className="md:grid md:grid-cols-2">
-                <div className="mb-4 w-full flex justify-center md:hidden block">
-                  <img
-                    src={selectedItem?.thumbnail_images[0]?.images[0]?.url}
-                    className="w-[85%] transition-all rounded-md"
-                    alt={selectedItem.title}
-                  />
-                </div>
+              <div className="md:grid md:grid-cols-2 gap-4">
                 <div
-                  className="pr-4 basis-1 h-full max-h-[60vh] lg:max-h-[50vh] overflow-y-auto scrollbar-custom"
+                  className="pr-0 md:pr-4 basis-1 h-full max-h-[60vh] lg:max-h-[50vh] overflow-y-auto scrollbar-custom order-2 md:order-1"
                   dangerouslySetInnerHTML={{
                     __html: selectedItem.description,
                   }}
                 ></div>
-                <div className="ml-4 w-full basis-1 md:block hidden w-[418px] h-[280px]">
-                  <img
-                    src={selectedItem?.thumbnail_images[0]?.images[0]?.url}
-                    className="w-full transition-all rounded-md"
-                    alt={selectedItem.title}
-                  />
+                <div className="w-full basis-1 order-1 md:order-2">
+                  <div className="aspect-square md:aspect-auto md:h-full flex items-center justify-center">
+                    <img
+                      src={selectedItem?.thumbnail_images[0]?.images[0]?.url}
+                      className="w-full h-auto max-h-[280px] object-cover rounded-md"
+                      alt={selectedItem.title}
+                    />
+                  </div>
                 </div>
               </div>
             </>
