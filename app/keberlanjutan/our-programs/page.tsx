@@ -71,13 +71,13 @@ const page = async () => {
 
   const linksData = [
     {
-      href: "/csr",
+      href: "/keberlanjutan",
       image: dataCSR.data.id.banner[0].id.images[0].url,
       alt: "Tanggung Jawab Sosial",
       title: dataCSR.data.id.page_title,
     },
     {
-      href: "/csr/collaboration-partnership",
+      href: "/keberlanjutan/collaboration-partnership",
       image: "/temp/banner-collaboration-partnership.png",
       alt: "Kolaborasi & Kemitraan",
       title: "Kolaborasi & Kemitraan",

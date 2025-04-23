@@ -16,6 +16,7 @@ const NewsList = () => {
   const lang = JSCookie.get("lang") || "id";
   const [queryValue, setQueryValue] = React.useState("");
   const [queryValueDebounce] = useDebounce(queryValue, 500);
+  const [isEndOfData, setIsEndOfData] = React.useState(false);
 
   const {
     data: contentResults,
@@ -23,16 +24,30 @@ const NewsList = () => {
     fetchNextPage,
     hasNextPage,
     refetch,
+    isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["news", lang],
-    queryFn: async ({ pageParam = 1 }) =>
-      await getContent({ page: pageParam || 1 }),
+    queryKey: ["news", lang, queryValueDebounce],
+    queryFn: async ({ pageParam = 1 }) => {
+      const data = await getContent({ page: pageParam || 1 });
+      // If we get back an empty array or fewer items than limit, mark as end of data
+      if (!data || data.length === 0 || data.length < limit) {
+        setIsEndOfData(true);
+      }
+      return data;
+    },
     getNextPageParam: (lastPage, allPages) => {
-      const nextPage =
-        lastPage?.length === limit ? allPages.length + 1 : undefined;
-      return nextPage;
+      // Only return next page if we received full 'limit' items and haven't marked end of data
+      if (lastPage && lastPage.length === limit && !isEndOfData) {
+        return allPages.length + 1;
+      }
+      return undefined;
     },
     enabled: !!lang,
+    // Add error handling
+    onError: (error) => {
+      console.error("Error fetching news data:", error);
+      setIsEndOfData(true);
+    },
   });
 
   const getContent = async ({ page }: { page: number }) => {
@@ -48,12 +63,19 @@ const NewsList = () => {
 
       const response = await ApiService.get("/content", params);
 
-      return (response.data.data as ContentType[]) || [];
+      // Check if there are any results
+      const results = (response.data.data as ContentType[]) || [];
+      return results;
     } catch (error: any) {
-      console.log(error);
+      console.error("API Error:", error);
       return [];
     }
   };
+
+  // Reset the end of data state when search query changes
+  React.useEffect(() => {
+    setIsEndOfData(false);
+  }, [queryValueDebounce]);
 
   return (
     <React.Fragment>
@@ -65,18 +87,28 @@ const NewsList = () => {
             placeholder={lang === "en" ? "Search..." : "Cari..."}
             onChange={(e) => setQueryValue(e.target.value)}
           />
-          <Button onClick={() => refetch()}>Submit</Button>
+          <Button
+            onClick={() => {
+              setIsEndOfData(false);
+              refetch();
+            }}
+          >
+            Submit
+          </Button>
         </div>
       </section>
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-8">
-        {contentResults?.pages?.map((d) =>
-          d.map((data) => (
+        {contentResults?.pages?.flatMap((page, i) =>
+          page.map((data) => (
             <div key={data._id} className="border rounded-md">
               <div className="aspect-video">
                 <img
                   className="aspect-video object-cover w-full h-full rounded-md"
-                  src={data?.thumbnail_images[0]?.images[0]?.url}
-                  alt={data.title}
+                  src={
+                    data?.thumbnail_images?.[0]?.images?.[0]?.url ||
+                    "/placeholder-image.jpg"
+                  }
+                  alt={data.title || "News image"}
                 />
               </div>
 
@@ -103,19 +135,44 @@ const NewsList = () => {
           ))
         )}
       </section>
+
+      {/* Show loading indicator when initially loading */}
+      {isLoading && (
+        <div className="mt-8 flex justify-center">
+          <Loader2 className="animate-spin" size={24} color="green" />
+        </div>
+      )}
+
+      {/* No results message */}
+      {!isLoading && contentResults?.pages?.[0]?.length === 0 && (
+        <div className="mt-8 text-center">
+          <p>
+            {lang === "en" ? "No results found" : "Tidak ada hasil ditemukan"}
+          </p>
+        </div>
+      )}
+
+      {/* Load more section */}
       <section className="mt-24 flex justify-center">
-        {hasNextPage ? (
+        {!isLoading && hasNextPage && !isEndOfData ? (
           <button
-            disabled={isLoading}
+            disabled={isFetchingNextPage}
             onClick={() => fetchNextPage()}
             className="bg-green-light flex items-center gap-1 text-white px-6 disabled:bg-green-light/80 py-2 rounded-full"
           >
             <span>{lang === "en" ? "Load More" : "Muat Lagi"}</span>{" "}
-            {isLoading ? (
+            {isFetchingNextPage ? (
               <Loader2 className="animate-spin" size={16} color="white" />
             ) : null}
           </button>
         ) : null}
+
+        {/* End of results message */}
+        {!hasNextPage && contentResults?.pages?.[0]?.length > 0 && (
+          <p className="text-gray-500">
+            {lang === "en" ? "End of results" : "Akhir dari hasil"}
+          </p>
+        )}
       </section>
     </React.Fragment>
   );

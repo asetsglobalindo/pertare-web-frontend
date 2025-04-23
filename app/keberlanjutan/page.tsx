@@ -67,13 +67,13 @@ const page = async () => {
   const dataOurPrograms: any = await getDataBannerOurPrograms();
   const linksData = [
     {
-      href: "/csr/our-programs",
+      href: "/keberlanjutan/our-programs",
       image: dataOurPrograms.data.id.banner[0].id.images[0].url,
       alt: "Program Kami",
       title: dataOurPrograms.data.id.page_title,
     },
     {
-      href: "/csr/collaboration-partnership",
+      href: "/keberlanjutan/collaboration-partnership",
       image: "/temp/banner-collaboration-partnership.png",
       alt: "Kolaborasi & Kemitraan",
       title: "Kolaborasi & Kemitraan",
