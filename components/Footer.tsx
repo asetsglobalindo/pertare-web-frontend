@@ -154,7 +154,7 @@ const Footer = () => {
                 </a>
                 <Link suppressHydrationWarning href="/bazma">
                   <img
-                    className="max-w-[230px]"
+                    className="max-w-[180px]"
                     src="/logo/bazma.png"
                     alt="bazma"
                   />

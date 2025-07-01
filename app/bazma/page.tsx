@@ -57,7 +57,7 @@ const page = async () => {
         </section>
       ) : null}
 
-      <section className="container mt-16 max-w-[900px]">
+      <section className="container mt-24 pt-8 max-w-[900px]">
         <h1 className="title-3 text-center">{data.title}</h1>
         <div className="mt-8" dangerouslySetInnerHTML={{__html: data.description}}></div>
       </section>
