@@ -120,14 +120,14 @@ const NewsList = () => {
         className="flex justify-center"
       >
         <motion.div 
-          className="relative w-full max-w-md"
+          className="relative w-full max-w-sm"
           animate={{ 
             scale: isSearchFocused ? 1.02 : 1,
           }}
           transition={{ duration: 0.2 }}
         >
           <motion.div
-            className="absolute left-4 top-4 z-10 flex items-center justify-center w-6 h-6"
+            className="absolute left-4 top-3 z-10 flex items-center justify-center w-6 h-6"
             animate={{ 
               color: isSearchFocused ? "#10b981" : "#6b7280",
               scale: isSearching ? [1, 1.2, 1] : 1
@@ -142,7 +142,7 @@ const NewsList = () => {
           
           <Input
             value={queryValue}
-            className="h-14 pl-12 pr-12 border-2 transition-all duration-300 focus:border-green-light focus:ring-2 focus:ring-green-light/20 focus:shadow-lg rounded-full text-center"
+            className="h-12 pl-12 pr-12 border-2 transition-all duration-300 focus:border-green-light focus:ring-2 focus:ring-green-light/20 focus:shadow-lg rounded-full text-center"
             placeholder={lang === "en" ? "Search news..." : "Cari berita..."}
             onChange={(e) => setQueryValue(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
@@ -157,7 +157,7 @@ const NewsList = () => {
                 exit={{ opacity: 0, scale: 0.8 }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center w-6 h-6"
+                className="absolute right-4 top-3 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center w-6 h-6"
                 onClick={clearSearch}
               >
                 <X size={20} />
