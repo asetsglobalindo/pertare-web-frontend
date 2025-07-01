@@ -89,22 +89,24 @@ const page = async () => {
       {/* Section Direksi  */}
       <section className="container mt-16">
         <h1 className="mb-8 text-center text-5xl font-bold">
-          <span className="text-black">Komitmen Keberlanjutan</span>
+          <span className="text-black">
+            {data.sustainability_commitment_title || "Komitmen Keberlanjutan"}
+          </span>
         </h1>
         <section className="flex flex-col sm:flex-row items-center gap-8 w-full">
           {/* Card Image */}
           <div className="bg-[#9CA9B1] relative h-[340px] rounded-2xl p-6 flex-shrink-0 w-full sm:w-1/3 flex flex-col items-start justify-end">
             <img
-              src="/temp/zibali2.jpeg"
-              alt="Zibali Hisbul Masih"
+              src={data.sustainability_commitment_ceo_image?.[0]?.images[0]?.url || "/temp/zibali2.jpeg"}
+              alt={data.sustainability_commitment_ceo_name || "Zibali Hisbul Masih"}
               className="absolute inset-0 w-full h-full rounded-lg object-cover object-left-top"
             />
             <div className="text-white text-left mt-4 relative z-[1]">
               <h3 className="font-bold text-lg relative inline-block pb-1 border-b border-white">
-                <span className="text-white">Zibali Hisbul Masih</span>
+                <span className="text-white">{data.sustainability_commitment_ceo_name || "Zibali Hisbul Masih"}</span>
               </h3>
               <p className="text-sm mt-[8px]">
-                Direktur Utama PT Pertamina Retail
+{data.sustainability_commitment_ceo_position || "Direktur Utama PT Pertamina Retail"}
               </p>
             </div>
           </div>
@@ -112,20 +114,23 @@ const page = async () => {
           {/* Text Content */}
           <div className="w-full sm:w-2/3">
             <blockquote className="text-gray-600 text-lg">
-              “Sebagai bagian dari subholding C&T keluarga besar Pertamina, kami
-              berkomitmen untuk mendukung pencapaian Sustainable Development
-              Goals (SDGs) melalui integrasi prinsip Environmental, Social, dan
-              Governance (ESG). Dalam upaya mencapai Net Zero Emission 2060,
-              kami terus mengembangkan inisiatif energi bersih dan ramah
-              lingkungan yang sejalan dengan transisi energi berkelanjutan.
-              <br />
-              <br />
-              Serta melalui pilar-pilar CSR, seperti pemberdayaan komunitas,
-              pendidikan, pelestarian lingkungan, serta kesehatan dan
-              keselamatan, kami percaya bahwa tanggung jawab sosial harus
-              memberikan dampak nyata. Dengan ber-SINERGI, kami optimis dapat
-              menghadirkan perubahan positif bagi masyarakat dan lingkungan,
-              demi masa depan yang lebih hijau dan inklusif.”
+              {data.sustainability_commitment_ceo_quote ? (
+                <div dangerouslySetInnerHTML={{ __html: data.sustainability_commitment_ceo_quote }} />
+              ) : (
+                `"Sebagai bagian dari subholding C&T keluarga besar Pertamina, kami
+                berkomitmen untuk mendukung pencapaian Sustainable Development
+                Goals (SDGs) melalui integrasi prinsip Environmental, Social, dan
+                Governance (ESG). Dalam upaya mencapai Net Zero Emission 2060,
+                kami terus mengembangkan inisiatif energi bersih dan ramah
+                lingkungan yang sejalan dengan transisi energi berkelanjutan.
+                
+                Serta melalui pilar-pilar CSR, seperti pemberdayaan komunitas,
+                pendidikan, pelestarian lingkungan, serta kesehatan dan
+                keselamatan, kami percaya bahwa tanggung jawab sosial harus
+                memberikan dampak nyata. Dengan ber-SINERGI, kami optimis dapat
+                menghadirkan perubahan positif bagi masyarakat dan lingkungan,
+                demi masa depan yang lebih hijau dan inklusif.`
+              )}
             </blockquote>
           </div>
         </section>

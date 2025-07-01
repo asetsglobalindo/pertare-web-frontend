@@ -127,6 +127,12 @@ export interface ContentType {
   created_by: string;
   updated_at: string;
   updated_by: string;
+  // Sustainability Commitment fields
+  sustainability_commitment_title?: string;
+  sustainability_commitment_ceo_name?: string;
+  sustainability_commitment_ceo_position?: string;
+  sustainability_commitment_ceo_image?: ImageType[] | [];
+  sustainability_commitment_ceo_quote?: string;
 }
 
 interface Tab {
