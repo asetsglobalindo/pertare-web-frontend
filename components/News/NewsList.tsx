@@ -1,52 +1,40 @@
 "use client";
 import React from "react";
-import { useInfiniteQuery } from "react-query";
+import { useQuery } from "react-query";
 import JSCookie from "js-cookie";
 import ApiService from "@/lib/ApiService";
 import { ContentType } from "@/types/indes";
 import moment from "moment";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useDebounce } from "use-debounce";
+import { motion, AnimatePresence } from "framer-motion";
 
 const NewsList = () => {
   const limit = 12;
   const lang = JSCookie.get("lang") || "id";
   const [queryValue, setQueryValue] = React.useState("");
   const [queryValueDebounce] = useDebounce(queryValue, 500);
-  const [isEndOfData, setIsEndOfData] = React.useState(false);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [totalPages, setTotalPages] = React.useState(1);
+  const [isSearchFocused, setIsSearchFocused] = React.useState(false);
+  const [isSearching, setIsSearching] = React.useState(false);
 
   const {
     data: contentResults,
     isLoading,
-    fetchNextPage,
-    hasNextPage,
     refetch,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["news", lang, queryValueDebounce],
-    queryFn: async ({ pageParam = 1 }) => {
-      const data = await getContent({ page: pageParam || 1 });
-      // If we get back an empty array or fewer items than limit, mark as end of data
-      if (!data || data.length === 0 || data.length < limit) {
-        setIsEndOfData(true);
-      }
-      return data;
-    },
-    getNextPageParam: (lastPage, allPages) => {
-      // Only return next page if we received full 'limit' items and haven't marked end of data
-      if (lastPage && lastPage.length === limit && !isEndOfData) {
-        return allPages.length + 1;
-      }
-      return undefined;
+  } = useQuery({
+    queryKey: ["news", lang, queryValueDebounce, currentPage],
+    queryFn: async () => {
+      const response = await getContent({ page: currentPage });
+      return response;
     },
     enabled: !!lang,
-    // Add error handling
     onError: (error) => {
       console.error("Error fetching news data:", error);
-      setIsEndOfData(true);
     },
   });
 
@@ -65,6 +53,25 @@ const NewsList = () => {
 
       // Check if there are any results
       const results = (response.data.data as ContentType[]) || [];
+      
+      // Debug: log response structure
+      console.log("API Response:", response.data);
+      
+      // Calculate total pages based on response
+      const total = response.data.total || response.data.totalCount || 0;
+      let calculatedTotalPages = Math.ceil(total / limit);
+      
+      // Fallback: if no total count, assume there are more pages if we got full limit
+      if (total === 0 && results.length === limit) {
+        calculatedTotalPages = currentPage + 1;
+      } else if (total === 0 && results.length < limit) {
+        calculatedTotalPages = currentPage;
+      }
+      
+      console.log("Total items:", total, "Total pages:", calculatedTotalPages);
+      
+      setTotalPages(calculatedTotalPages);
+      
       return results;
     } catch (error: any) {
       console.error("API Error:", error);
@@ -72,108 +79,328 @@ const NewsList = () => {
     }
   };
 
-  // Reset the end of data state when search query changes
+  // Reset to first page when search query changes
   React.useEffect(() => {
-    setIsEndOfData(false);
-  }, [queryValueDebounce]);
+    setCurrentPage(1);
+    if (queryValueDebounce !== queryValue) {
+      setIsSearching(true);
+    } else {
+      setIsSearching(false);
+    }
+  }, [queryValueDebounce, queryValue]);
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const clearSearch = () => {
+    setQueryValue("");
+    setCurrentPage(1);
+  };
+
+  const handleSearchSubmit = () => {
+    setCurrentPage(1);
+    refetch();
+  };
 
   return (
     <React.Fragment>
-      <section>
-        <div className="flex gap-4 ">
-          <Input
-            value={queryValue}
-            className="lg:max-w-[300px]"
-            placeholder={lang === "en" ? "Search..." : "Cari..."}
-            onChange={(e) => setQueryValue(e.target.value)}
-          />
-          <Button
-            onClick={() => {
-              setIsEndOfData(false);
-              refetch();
+      <motion.section
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex justify-center"
+      >
+        <motion.div 
+          className="relative w-full max-w-md"
+          animate={{ 
+            scale: isSearchFocused ? 1.02 : 1,
+          }}
+          transition={{ duration: 0.2 }}
+        >
+          <motion.div
+            className="absolute left-4 top-4 z-10 flex items-center justify-center w-6 h-6"
+            animate={{ 
+              color: isSearchFocused ? "#10b981" : "#6b7280",
+              scale: isSearching ? [1, 1.2, 1] : 1
+            }}
+            transition={{ 
+              duration: isSearching ? 0.6 : 0.2,
+              repeat: isSearching ? Infinity : 0
             }}
           >
-            Submit
-          </Button>
-        </div>
-      </section>
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-8">
-        {contentResults?.pages?.flatMap((page, i) =>
-          page.map((data) => (
-            <div key={data._id} className="border rounded-md">
-              <div className="aspect-video">
-                <img
-                  className="aspect-video object-cover w-full h-full rounded-md"
+            <Search size={20} />
+          </motion.div>
+          
+          <Input
+            value={queryValue}
+            className="h-14 pl-12 pr-12 border-2 transition-all duration-300 focus:border-green-light focus:ring-2 focus:ring-green-light/20 focus:shadow-lg rounded-full text-center"
+            placeholder={lang === "en" ? "Search news..." : "Cari berita..."}
+            onChange={(e) => setQueryValue(e.target.value)}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setIsSearchFocused(false)}
+          />
+          
+          <AnimatePresence>
+            {queryValue && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center w-6 h-6"
+                onClick={clearSearch}
+              >
+                <X size={20} />
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </motion.section>
+      
+      {/* Search Results Info */}
+      <AnimatePresence>
+        {queryValueDebounce && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mt-6 text-center text-sm text-gray-600"
+          >
+            {isLoading ? (
+              <span>{lang === "en" ? "Searching..." : "Mencari..."}</span>
+            ) : (
+              <span>
+                {lang === "en" ? "Search results for" : "Hasil pencarian untuk"} "{queryValueDebounce}"
+                {contentResults && contentResults.length > 0 && (
+                  <span className="ml-2 text-green-600 font-medium">
+                    ({contentResults.length} {lang === "en" ? "found" : "ditemukan"})
+                  </span>
+                )}
+              </span>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      <motion.section 
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-8"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: { opacity: 0 },
+          visible: {
+            opacity: 1,
+            transition: {
+              delayChildren: 0.1,
+              staggerChildren: 0.1
+            }
+          }
+        }}
+      >
+        <AnimatePresence mode="wait">
+          {contentResults?.map((data, index) => (
+            <motion.div 
+              key={data._id} 
+              className="border rounded-md group cursor-pointer"
+              variants={{
+                hidden: { 
+                  opacity: 0, 
+                  y: 20,
+                  scale: 0.95
+                },
+                visible: { 
+                  opacity: 1, 
+                  y: 0,
+                  scale: 1,
+                  transition: {
+                    duration: 0.5,
+                    ease: "easeOut"
+                  }
+                }
+              }}
+              whileHover={{
+                y: -8,
+                scale: 1.02,
+                transition: {
+                  duration: 0.3,
+                  ease: "easeOut"
+                }
+              }}
+              whileTap={{
+                scale: 0.98
+              }}
+              layout
+            >
+              <div className="aspect-video overflow-hidden rounded-t-md relative">
+                <motion.img
+                  className="aspect-video object-cover w-full h-full"
                   src={
                     data?.thumbnail_images?.[0]?.images?.[0]?.url ||
                     "/placeholder-image.jpg"
                   }
                   alt={data.title || "News image"}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
                 />
               </div>
 
-              <section className="px-4 pb-4">
-                <div className="flex justify-between items-center mt-2 border-b pb-2">
+              <motion.section 
+                className="px-4 pb-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.4 }}
+              >
+                <motion.div 
+                  className="flex justify-between items-center mt-2 border-b pb-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.3 }}
+                >
                   <div className="font-medium leading-none">
                     {moment(data.created_at).format("DD MMMM YYYY")}
                   </div>
-                </div>
+                </motion.div>
 
-                <h1 className="mt-3 font-semibold title-5 h-[65px] line-clamp-3 overflow-none">
-                  {data.title}
-                </h1>
-                <p className="mt-2 line-clamp-2 text-xs">{data.small_text}</p>
-
-                <Link
-                  className="inline-block underline font-semibold uppercase mt-4"
-                  href={`/news/${data.slug}`}
+                <motion.h1 
+                  className="mt-3 font-semibold title-5 h-[65px] line-clamp-3 overflow-none"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4, duration: 0.3 }}
                 >
-                  {lang === "en" ? "Read More" : "Baca Selengkapnya"}
-                </Link>
-              </section>
-            </div>
-          ))
-        )}
-      </section>
+                  {data.title}
+                </motion.h1>
+                
+                <motion.p 
+                  className="mt-2 line-clamp-2 text-xs"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5, duration: 0.3 }}
+                >
+                  {data.small_text}
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6, duration: 0.3 }}
+                >
+                  <Link
+                    className="inline-block underline font-semibold uppercase mt-4 hover:text-green-light transition-colors duration-200"
+                    href={`/news/${data.slug}`}
+                  >
+                    {lang === "en" ? "Read More" : "Baca Selengkapnya"}
+                  </Link>
+                </motion.div>
+              </motion.section>
+            </motion.div>
+        ))}
+        </AnimatePresence>
+      </motion.section>
 
       {/* Show loading indicator when initially loading */}
       {isLoading && (
-        <div className="mt-8 flex justify-center">
-          <Loader2 className="animate-spin" size={24} color="green" />
-        </div>
+        <motion.div 
+          className="mt-8 flex justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          >
+            <Loader2 size={24} color="green" />
+          </motion.div>
+        </motion.div>
       )}
 
       {/* No results message */}
-      {!isLoading && contentResults?.pages?.[0]?.length === 0 && (
-        <div className="mt-8 text-center">
-          <p>
-            {lang === "en" ? "No results found" : "Tidak ada hasil ditemukan"}
-          </p>
-        </div>
-      )}
-
-      {/* Load more section */}
-      <section className="mt-24 flex justify-center">
-        {!isLoading && hasNextPage && !isEndOfData ? (
-          <button
-            disabled={isFetchingNextPage}
-            onClick={() => fetchNextPage()}
-            className="bg-green-light flex items-center gap-1 text-white px-6 disabled:bg-green-light/80 py-2 rounded-full"
+      <AnimatePresence>
+        {!isLoading && contentResults?.length === 0 && (
+          <motion.div 
+            className="mt-16 text-center"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
           >
-            <span>{lang === "en" ? "Load More" : "Muat Lagi"}</span>{" "}
-            {isFetchingNextPage ? (
-              <Loader2 className="animate-spin" size={16} color="white" />
-            ) : null}
-          </button>
-        ) : null}
-
-        {/* End of results message */}
-        {!hasNextPage && contentResults?.pages?.[0]?.length > 0 && (
-          <p className="text-gray-500">
-            {lang === "en" ? "End of results" : "Akhir dari hasil"}
-          </p>
+            <motion.div
+              initial={{ y: 20 }}
+              animate={{ y: 0 }}
+              transition={{ delay: 0.1, duration: 0.4 }}
+            >
+              <Search size={48} className="mx-auto text-gray-300 mb-4" />
+              <p className="text-lg text-gray-500 mb-2">
+                {lang === "en" ? "No results found" : "Tidak ada hasil ditemukan"}
+              </p>
+              {queryValueDebounce && (
+                <p className="text-sm text-gray-400">
+                  {lang === "en" ? "Try searching with different keywords" : "Coba cari dengan kata kunci yang berbeda"}
+                </p>
+              )}
+            </motion.div>
+          </motion.div>
         )}
-      </section>
+      </AnimatePresence>
+
+      {/* Pagination section */}
+      {!isLoading && contentResults && contentResults.length > 0 && totalPages > 1 && (
+        <motion.section 
+          className="mt-24 flex justify-center items-center gap-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Button
+              variant="outline"
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              className="flex items-center gap-2"
+            >
+              <ChevronLeft size={16} />
+              {lang === "en" ? "Previous" : "Sebelumnya"}
+            </Button>
+          </motion.div>
+          
+          <motion.span 
+            className="text-sm text-gray-600"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.3 }}
+          >
+            {lang === "en" ? "Page" : "Halaman"} {currentPage} {lang === "en" ? "of" : "dari"} {totalPages}
+          </motion.span>
+          
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Button
+              variant="outline"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-2"
+            >
+              {lang === "en" ? "Next" : "Selanjutnya"}
+              <ChevronRight size={16} />
+            </Button>
+          </motion.div>
+        </motion.section>
+      )}
     </React.Fragment>
   );
 };
