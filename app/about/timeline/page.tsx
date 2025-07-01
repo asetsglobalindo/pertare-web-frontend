@@ -72,9 +72,10 @@ const Timeline = ({
                   <h2 className="text-6xl font-normal mb-4 transition-all duration-700 opacity-100 translate-y-0">
                     {item.year}
                   </h2>
-                  <div className="text-sm transition-all duration-700 delay-300 opacity-100 translate-y-0">
-                    {item.description.replace(/<[^>]*>/g, "")}
-                  </div>
+                  <div 
+                    className="text-sm transition-all duration-700 delay-300 opacity-100 translate-y-0"
+                    dangerouslySetInnerHTML={{ __html: item.description }}
+                  />
                 </div>
               </div>
             </SwiperSlide>

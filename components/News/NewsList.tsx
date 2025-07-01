@@ -209,38 +209,38 @@ const NewsList = () => {
       >
         <AnimatePresence mode="wait">
           {contentResults?.map((data, index) => (
-            <motion.div 
-              key={data._id} 
-              className="border rounded-md group cursor-pointer"
-              variants={{
-                hidden: { 
-                  opacity: 0, 
-                  y: 20,
-                  scale: 0.95
-                },
-                visible: { 
-                  opacity: 1, 
-                  y: 0,
-                  scale: 1,
+            <Link key={data._id} href={`/news/${data.slug}`}>
+              <motion.div 
+                className="border rounded-md group cursor-pointer"
+                variants={{
+                  hidden: { 
+                    opacity: 0, 
+                    y: 20,
+                    scale: 0.95
+                  },
+                  visible: { 
+                    opacity: 1, 
+                    y: 0,
+                    scale: 1,
+                    transition: {
+                      duration: 0.5,
+                      ease: "easeOut"
+                    }
+                  }
+                }}
+                whileHover={{
+                  y: -8,
+                  scale: 1.02,
                   transition: {
-                    duration: 0.5,
+                    duration: 0.3,
                     ease: "easeOut"
                   }
-                }
-              }}
-              whileHover={{
-                y: -8,
-                scale: 1.02,
-                transition: {
-                  duration: 0.3,
-                  ease: "easeOut"
-                }
-              }}
-              whileTap={{
-                scale: 0.98
-              }}
-              layout
-            >
+                }}
+                whileTap={{
+                  scale: 0.98
+                }}
+                layout
+              >
               <div className="aspect-video overflow-hidden rounded-t-md relative">
                 <motion.img
                   className="aspect-video object-cover w-full h-full"
@@ -293,16 +293,13 @@ const NewsList = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6, duration: 0.3 }}
+                  className="text-green-light font-semibold uppercase mt-4 hover:text-green-600 transition-colors duration-200"
                 >
-                  <Link
-                    className="inline-block underline font-semibold uppercase mt-4 hover:text-green-light transition-colors duration-200"
-                    href={`/news/${data.slug}`}
-                  >
-                    {lang === "en" ? "Read More" : "Baca Selengkapnya"}
-                  </Link>
+                  {lang === "en" ? "Read More" : "Baca Selengkapnya"}
                 </motion.div>
               </motion.section>
             </motion.div>
+            </Link>
         ))}
         </AnimatePresence>
       </motion.section>
