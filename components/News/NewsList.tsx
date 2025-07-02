@@ -19,6 +19,7 @@ const NewsList = () => {
   const [queryValueDebounce] = useDebounce(queryValue, 500);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [totalPages, setTotalPages] = React.useState(1);
+  const [hasNextPage, setHasNextPage] = React.useState(false);
   const [isSearchFocused, setIsSearchFocused] = React.useState(false);
   const [isSearching, setIsSearching] = React.useState(false);
 
@@ -57,15 +58,24 @@ const NewsList = () => {
       // Debug: log response structure
       console.log("API Response:", response.data);
       
-      // Calculate total pages based on response
-      const total = response.data.total || response.data.totalCount || 0;
+      // Calculate total pages based on response (check pages object first like other components)
+      const total = response.data.pages?.total_data || response.data.total || response.data.totalCount || 0;
       let calculatedTotalPages = Math.ceil(total / limit);
       
-      // Fallback: if no total count, assume there are more pages if we got full limit
-      if (total === 0 && results.length === limit) {
-        calculatedTotalPages = currentPage + 1;
-      } else if (total === 0 && results.length < limit) {
-        calculatedTotalPages = currentPage;
+      // Fallback: if no total count, use more conservative approach
+      if (total === 0) {
+        if (results.length < limit) {
+          // If we got less than limit, this is the last page
+          calculatedTotalPages = currentPage;
+          setHasNextPage(false);
+        } else {
+          // If we got full limit, we don't know total pages yet, so don't show total
+          calculatedTotalPages = 0; // This will hide the "of X" part in pagination
+          setHasNextPage(true); // Assume there might be more pages
+        }
+      } else {
+        // We have total count, so we can determine if there are more pages
+        setHasNextPage(currentPage < calculatedTotalPages);
       }
       
       console.log("Total items:", total, "Total pages:", calculatedTotalPages);
@@ -96,7 +106,7 @@ const NewsList = () => {
   };
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) {
+    if (totalPages > 0 ? currentPage < totalPages : hasNextPage) {
       setCurrentPage(currentPage + 1);
     }
   };
@@ -379,7 +389,10 @@ const NewsList = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.3 }}
           >
-            {lang === "en" ? "Page" : "Halaman"} {currentPage} {lang === "en" ? "of" : "dari"} {totalPages}
+            {totalPages > 0 
+              ? `${lang === "en" ? "Page" : "Halaman"} ${currentPage} ${lang === "en" ? "of" : "dari"} ${totalPages}`
+              : `${lang === "en" ? "Page" : "Halaman"} ${currentPage}`
+            }
           </motion.span>
           
           <motion.div
@@ -389,7 +402,7 @@ const NewsList = () => {
             <Button
               variant="outline"
               onClick={handleNextPage}
-              disabled={currentPage === totalPages}
+              disabled={totalPages > 0 ? currentPage === totalPages : !hasNextPage}
               className="flex items-center gap-2"
             >
               {lang === "en" ? "Next" : "Selanjutnya"}
