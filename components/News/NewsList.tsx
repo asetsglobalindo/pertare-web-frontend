@@ -52,11 +52,8 @@ const NewsList = () => {
 
       const response = await ApiService.get("/content", params);
 
-      // Check if there are any results
-      const results = (response.data.data as ContentType[]) || [];
-      
-      // Debug: log response structure
-      console.log("API Response:", response.data);
+      // Get results from API response - backend now handles sorting
+      let results = (response.data.data as ContentType[]) || [];
       
       // Calculate total pages based on response (check pages object first like other components)
       const total = response.data.pages?.total_data || response.data.total || response.data.totalCount || 0;
@@ -121,6 +118,7 @@ const NewsList = () => {
     refetch();
   };
 
+  
   return (
     <React.Fragment>
       <motion.section
