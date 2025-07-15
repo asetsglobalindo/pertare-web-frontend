@@ -134,7 +134,7 @@ const HomeLocator: React.FC<{data: HomeType}> = ({data}) => {
             className="h-[400px] lg:h-[550px] xl:h-[650px] rounded-[20px] z-[30]"
             zoom={6}
           >
-            <TileLayer url="https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=c56d26e0f3eb454f8dff29acecde52d6" />
+            <TileLayer url="https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=581cf7b1b50f448e8d53f3235b2159e1" />
             <MarkerClusterGroup>
               {locationData?.map((item) => (
                 <Marker key={item._id} position={[+item.lat || 0, +item.long || 0]} icon={LefleatMapIcon.SPBU}>

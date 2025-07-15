@@ -304,7 +304,7 @@ const OutletLocatorMap = () => {
         className="w-full h-full  z-20"
         zoom={6}
       >
-        <TileLayer url="https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=c56d26e0f3eb454f8dff29acecde52d6" />
+        <TileLayer url="https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=581cf7b1b50f448e8d53f3235b2159e1" />
         <MarkerClusterGroup>
           {locationData
             ?.filter((d) => {
