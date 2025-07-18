@@ -107,7 +107,6 @@ const OutletLocatorMap = () => {
         : ["-"];
 
       setFacilities(newFacilities);
-
     } catch (error) {
       console.error("Error fetching surrounding area:", error);
       setSurroundingArea(["-"]);
@@ -304,7 +303,10 @@ const OutletLocatorMap = () => {
         className="w-full h-full  z-20"
         zoom={6}
       >
-        <TileLayer url="https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=581cf7b1b50f448e8d53f3235b2159e1" />
+        <TileLayer 
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
         <MarkerClusterGroup>
           {locationData
             ?.filter((d) => {

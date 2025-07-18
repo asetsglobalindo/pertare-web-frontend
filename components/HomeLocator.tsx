@@ -1,37 +1,45 @@
 "use client";
-import {cn} from "@/lib/utils";
-import React, {useState} from "react";
-import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet";
+import { cn } from "@/lib/utils";
+import React, { useState } from "react";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
-import {useQuery} from "react-query";
+import { useQuery } from "react-query";
 import ApiService from "@/lib/ApiService";
-import {HomeType, LocationType} from "@/types/indes";
-import {useDebounce} from "use-debounce";
-import {Loader2Icon} from "lucide-react";
+import { HomeType, LocationType } from "@/types/indes";
+import { useDebounce } from "use-debounce";
+import { Loader2Icon } from "lucide-react";
 import LefleatMapIcon from "@/lib/LefleatIcon";
 import MapPopup from "./MapPopup";
 import "react-leaflet-markercluster/styles";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 
-const HomeLocator: React.FC<{data: HomeType}> = ({data}) => {
+const HomeLocator: React.FC<{ data: HomeType }> = ({ data }) => {
   const [map, setMap] = useState<L.Map | null>(null);
   const [value, setValue] = useState<string>("");
   const [locationQuery] = useDebounce(value, 1000);
 
-  const {data: locationData} = useQuery({
+  const { data: locationData } = useQuery({
     queryKey: ["outlet-locator"],
     queryFn: async () => await getLocation(99999999),
   });
 
-  const {data: locationSuggestion, isLoading: isLoadingSuggestion} = useQuery({
-    queryKey: ["outlet-locator-suggestion", locationQuery],
-    queryFn: async () => await getLocation(5, locationQuery),
-    enabled: !!locationQuery.length,
-  });
+  const { data: locationSuggestion, isLoading: isLoadingSuggestion } = useQuery(
+    {
+      queryKey: ["outlet-locator-suggestion", locationQuery],
+      queryFn: async () => await getLocation(5, locationQuery),
+      enabled: !!locationQuery.length,
+    }
+  );
 
   const getLocation = async (limit: number = 5, search?: string) => {
     try {
-      const query: {page: number; limit: number; query?: string; lat: number | null; long: number | null} = {
+      const query: {
+        page: number;
+        limit: number;
+        query?: string;
+        lat: number | null;
+        long: number | null;
+      } = {
         page: 1,
         limit: limit,
         lat: null,
@@ -60,13 +68,21 @@ const HomeLocator: React.FC<{data: HomeType}> = ({data}) => {
   return (
     <section
       className="mt-8 lg:mt-16"
-      style={{background: "url(/texture/grid.png)", backgroundRepeat: "no-repeat", backgroundSize: "100% 550px"}}
+      style={{
+        background: "url(/texture/grid.png)",
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "100% 550px",
+      }}
     >
       <section className="container pt-16 lg:pt-8 flex flex-col lg:flex-row lg:space-x-16">
         <section className="w-full lg:w-5/12 lg:mt-16">
           <div className="">
-            <span className="title-4 font-normal text-green-light">{data.section3.small_text}</span>
-            <h1 className="text-white title-2 leading-snug mt-4 max-w-[400px]">{data.section3.title}</h1>
+            <span className="title-4 font-normal text-green-light">
+              {data.section3.small_text}
+            </span>
+            <h1 className="text-white title-2 leading-snug mt-4 max-w-[400px]">
+              {data.section3.title}
+            </h1>
           </div>
           <section className="relative">
             <div
@@ -77,7 +93,11 @@ const HomeLocator: React.FC<{data: HomeType}> = ({data}) => {
                 "flex bg-white items-center justify-center  w-full px-4 z-40 rounded-[15px] lg:rounded-[20px] mt-4 lg:mt-8 relative"
               )}
             >
-              <img className="h-4 w-4 lg:w-6 lg:h-6 mr-4" src="/icons/search-locator.png" alt="search-locator" />
+              <img
+                className="h-4 w-4 lg:w-6 lg:h-6 mr-4"
+                src="/icons/search-locator.png"
+                alt="search-locator"
+              />
               <div className="w-full">
                 <input
                   value={value}
@@ -94,7 +114,11 @@ const HomeLocator: React.FC<{data: HomeType}> = ({data}) => {
                   <Loader2Icon className="animate-spin " />
                 </div>
               ) : (
-                <img className="h-10 w-10 lg:w-[52px] lg:h-[52px]" src="/icons/search-btn.png" alt="search" />
+                <img
+                  className="h-10 w-10 lg:w-[52px] lg:h-[52px]"
+                  src="/icons/search-btn.png"
+                  alt="search"
+                />
               )}
             </div>
             <div
@@ -106,7 +130,11 @@ const HomeLocator: React.FC<{data: HomeType}> = ({data}) => {
                 "w-full transition-all px-8 pb-4 pt-8 scale-y-100  rounded-b-[20px] -mt-4 duration-500 overflow-hidden absolute z-[35]"
               )}
             >
-              <ul className={cn({"border-t border-black/20": locationSuggestion?.length})}>
+              <ul
+                className={cn({
+                  "border-t border-black/20": locationSuggestion?.length,
+                })}
+              >
                 {locationSuggestion?.map((d, index) => (
                   <li
                     onClick={() => {
@@ -134,10 +162,17 @@ const HomeLocator: React.FC<{data: HomeType}> = ({data}) => {
             className="h-[400px] lg:h-[550px] xl:h-[650px] rounded-[20px] z-[30]"
             zoom={6}
           >
-            <TileLayer url="https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey=581cf7b1b50f448e8d53f3235b2159e1" />
+            <TileLayer 
+              url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            />
             <MarkerClusterGroup>
               {locationData?.map((item) => (
-                <Marker key={item._id} position={[+item.lat || 0, +item.long || 0]} icon={LefleatMapIcon.SPBU}>
+                <Marker
+                  key={item._id}
+                  position={[+item.lat || 0, +item.long || 0]}
+                  icon={LefleatMapIcon.SPBU}
+                >
                   <Popup className="m-0">
                     <MapPopup item={item} />
                   </Popup>
@@ -152,4 +187,3 @@ const HomeLocator: React.FC<{data: HomeType}> = ({data}) => {
 };
 
 export default HomeLocator;
-
